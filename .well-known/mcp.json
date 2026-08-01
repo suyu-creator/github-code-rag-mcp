@@ -1,0 +1,15 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/mcp.json",
+  "mcpServers": {
+    "github-code-rag": {
+      "command": "uv",
+      "args": ["run", "github-code-rag"],
+      "transport": "stdio",
+      "metadata": {
+        "name": "GitHub Code Search",
+        "description": "Search and reuse code from GitHub repositories with FTS5 full-text search and search history tracking",
+        "categories": ["code-search", "code-reuse", "rag"]
+      }
+    }
+  }
+}
