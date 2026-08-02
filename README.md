@@ -5,7 +5,7 @@
     ██║   ██║██║   ██║   ██╔══██║██║   ██║██╔══██╗    ██║     ██║   ██║██║  ██║██╔══╝
     ╚██████╔╝██║   ██║   ██║  ██║╚██████╔╝██████╔╝    ╚██████╗╚██████╔╝██████╔╝███████╗
      ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
-        — 先搜 GitHub 再写代码 · 禁止从零造轮子 · 像高级工程师一样思考 —
+        — 让 AI 直接从 GitHub 抄代码 · 读完自动索引 · 复用优先 —
 </pre></div>
 
 <p align="center">
@@ -17,104 +17,113 @@
 </p>
 
 <p align="center">
-  <strong>你的 AI 写代码是不是在瞎猜？</strong><br/>
-  「做个电商网站」→ 直接开写 → 不对 → 重写 → 还不对 → 精疲力尽<br/>
+  <strong>写代码还在切浏览器搜 GitHub？</strong><br/>
+  让你的 AI 直接搜 2 亿+ 公开仓库，找到最相关的实现，抄过来还标来源。<br/>
   <br/>
-  <em>github-code-rag 让 AI 先调研、再提问、最后才动手 —— 像一个真正的高级工程师。</em>
+  <em>不用 clone、不用装插件、不用打开浏览器 —— AI 写代码时顺手就把 GitHub 搜了。</em>
 </p>
 
 ---
 
 ## 一句话介绍
 
-一个内置「需求分析 Agent」的 MCP 服务器。
-装完之后，你的 Claude / Cursor / Codex 不会再上来就写代码 —— 它会先搜 GitHub
-找同类项目，基于真实项目反问你需求，确认完了才动手，而且写的每一行代码都**必须从已读项目里复用**。
+一个让 AI **实时搜 GitHub 代码拿来复用**的 MCP 服务器。
+写认证？搜一下。写中间件？搜一下。写支付？搜一下。
+AI 写每一行代码之前，先去 GitHub 找最好的实现参考，**禁止从零造轮子**。
+还内置了一套「需求分析 Agent」方法论，让 AI 先调研再动手，不瞎猜。
 
 ---
 
-## 问题
+## 痛点
 
 你是不是也这样？
 
-> "让 AI 写个后台管理系统，写了三版都不对，它根本不知道我想要啥。"
+> "写个用户认证模块，切浏览器搜了半小时，找到的代码质量参差不齐。"
 
-> "我花一下午改 AI 写的代码，还不如自己从头写快。"
+> "明明 GitHub 上有最好的实现，AI 就是不知道去搜，非要自己从零瞎写。"
 
-> "每次都是从零开始，明明 GitHub 上有成熟方案，它就是不会去搜。"
+> "每次写新功能都像重新发明一遍轮子，明明到处都是参考答案。"
 
-**问题出在流程上。** 大多数 AI 写代码的流程是错的：
+**问题出在 AI 写代码的姿势不对。**
 
 ```
-错误流程：用户说需求 → AI 直接写 → 不对 → 改 → 还不对 → 放弃
+现在的流程：AI 想写 → 凭记忆瞎写 → 不对 → 改 → 还不对
 
-正确流程：需求 → 搜同类项目 → 分析方案 → 确认需求 → 复用代码 → 动手写
+应该有的流程：AI 想写 → 搜 GitHub → 找到最好的实现 → 复用 → 微调 → 完成
 ```
 
-**github-code-rag 把「工程师思维」装进了 MCP。**
+**github-code-rag 把 GitHub 塞进了 AI 的工具箱里。** 想写什么，先搜，再抄。
 
 ---
 
-## 核心特性
+## 核心能力
 
-### 强制「先搜再问」—— 不调研就不许写代码
+### 🔥 实时搜 GitHub，找到最相关的代码复用
 
-系统提示词硬编码了工作流，AI 必须先搜 GitHub，再基于搜索结果提问。
-想跳步？工具的设计就是让「跳过搜索直接写代码」变得比「先搜再写」更麻烦。
+按 star 排序，优先挑最成熟的项目。支持按语言、star 数筛选。
+
+```
+用户：帮我写个 FastAPI 的数据库连接模块
+    ↓
+AI：search_github("fastapi sqlalchemy database stars:>1000")
+AI：read_github_file("tiangolo/fastapi", "docs_src/sql_app/main.py")
+AI：search_code("create_engine sessionmaker")
+    ↓
+AI：我参考了 FastAPI 官方示例，给你写好了：
+
+# Source: tiangolo/fastapi/docs_src/sql_app/main.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+...
+```
+
+不用切浏览器、不用 clone 仓库、不用在几十个标签页里翻。
+AI 写代码时**顺手**就去 GitHub 搜了，找到最好的实现直接复用。
+
+### 📚 读过的代码自动索引，越用越顺手
+
+读过的仓库全部进本地 FTS5 全文索引，下次再搜相关代码毫秒级出结果。
+
+```
+→ search_code("jwt authentication middleware")
+  在 12 个已读仓库中找到 47 个匹配片段：
+  - fastapi/.../auth.py:35  JWT bearer middleware
+  - django/.../auth.py:128  Token authentication
+  - ...
+```
+
+用得越久，你的本地代码知识库越大，AI 写代码越快。
+
+### 🔄 GitHub API + Bing 双路兜底，不怕限流
+
+- GitHub Search API：质量最高，按 star 排序（60 次/时免费，配 Token 5000 次/时）
+- Bing 搜索兜底：免费无限额度，限流自动降级
+- 零 git clone：全部走 REST API，不占本地磁盘
+
+### 🧠 附赠：需求分析 Agent —— 先调研再动手
+
+系统提示词硬编码了工作流，AI 不会上来就瞎写。
+它会先搜同类项目，基于真实项目反问你需求，确认清楚了才动手。
 
 ```
 用户：我想做个博客系统
     ↓
-AI 调用 search_history("博客系统") → 没记录
-AI 调用 search_github("blog system python stars:>500")
-    ↓
-AI：找到了 10 个相关项目，从 500⭐ 到 50k⭐ 不等。
-    你是要做独立博客（类似 Hugo/Hexo），还是多用户博客平台？
+AI：[搜了 10 个相关项目]
+    你是要做独立博客（类似 Hugo/Hexo），还是多用户平台？
      - 独立博客（简单、SEO 好）
      - 多用户平台（功能复杂、需后台）
      - 我来根据 GitHub 项目给你推荐
 ```
 
-### 强制代码复用 —— 禁止从零造轮子
+可以理解为「附赠了一个高级工程师的工作方法论」。
+不需要可以不用，代码搜索本身就值回票价。
 
-读过的代码全部进本地知识库，写代码时随时搜。
-**复用优先**是写在系统提示词里的铁律：
+### ⚡ 零 git clone · 零向量数据库 · 仅 1 个依赖
 
-> "能找到现成实现就不要从零写。违反此规则 = 无效输出。"
-
-复用的代码会自动标注来源：
-
-```python
-# Source: tiangolo/fastapi/docs_src/sql_app/main.py
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-```
-
-### 越用越聪明 —— 你的私人项目知识库
-
-每次搜索都会存到本地 SQLite。上次调研完「电商小程序」，这次再问同类问题，直接从历史记录里开始，不用重新搜。
-
-```
-→ search_history("电商小程序")
-  类别 '电商小程序' 已读过的项目:
-    - justjavac/wechat-app-eshop (JavaScript) @ 2026-03-15
-    - xxx/shop-wxapp (TypeScript) @ 2026-03-14
-  → 有记录，直接用 search_code 搜具体实现
-```
-
-### GitHub API + Bing 双路兜底
-
-- GitHub Search API：质量高、按 star 排序（60 次/时免费，配 Token 后 5000 次/时）
-- Bing 搜索兜底：免费、无限额度、不需要 API Key
-- 限流自动降级，不用你操心
-
-### 零 git clone · 零向量数据库 · 仅 1 个依赖
-
-- 全部走 GitHub REST API，不需要 clone 仓库到本地
-- SQLite + FTS5 全文索引，不需要向量数据库和 embedding 模型
+- 全部走 GitHub REST API，不需要 clone 仓库
+- SQLite + FTS5 全文索引，不需要向量数据库和 embedding
 - 运行时只依赖 `mcp>=1.0`，其他全是 Python 标准库
-- 启动 < 1 秒，内存占用 < 50MB
+- 启动 < 1 秒，内存 < 50MB
 
 ---
 
@@ -122,12 +131,12 @@ from sqlalchemy.orm import sessionmaker
 
 | | 没装 github-code-rag | 装了 github-code-rag |
 |---|---|---|
-| AI 上来就写代码 | 写得飞起 | 先搜 GitHub 再说 |
-| 需求理解 | 靠猜 | 基于真实项目逐步确认 |
-| 代码质量 | 从零开始瞎写 | 从 2000 万 GitHub 仓库里挑最好的复用 |
-| 踩坑 | 每个坑都自己踩一遍 | 别人踩过的坑你跳过 |
-| 每次从头来 | 每次都是新鲜的 | 越用积累越多 |
-| 标来源 | 不知道抄的谁的 | 自动标注 `# Source: owner/repo/file.py` |
+| 写代码前搜 GitHub | 切浏览器手动搜 | AI 自动搜，直接复用 |
+| 代码来源 | 凭模型记忆瞎写 | 从 2 亿+ GitHub 仓库挑最好的 |
+| 代码质量 | 全靠模型水平 | 站在开源巨人肩膀上 |
+| 来源标注 | 不知道抄的谁的 | 自动标注 `# Source: owner/repo/file.py` |
+| 每次写新功能 | 从零开始 | 本地知识库越攒越多 |
+| GitHub 限流 | — | Bing 自动兜底，无限额度 |
 
 ---
 
@@ -158,6 +167,14 @@ export GITHUB_TOKEN=ghp_your_token_here
 ### 3. 配置到你的 AI 客户端
 
 见下面的「客户端配置」章节。
+
+### 4. 试试这个
+
+装好后跟你的 AI 说：
+
+> "帮我写一个 FastAPI 的 JWT 认证中间件，先去 GitHub 搜一下最好的实现参考"
+
+看看它会不会先搜 GitHub，再基于搜到的代码给你写。
 
 ---
 
@@ -273,12 +290,12 @@ command = "github-code-rag"
 
 | 工具 | 说明 |
 |---|---|
-| `search_history` | 查询同类项目的搜索历史（每次需求第一步必调用） |
 | `search_github` | GitHub 官方 API 搜索仓库，按 star 排序 |
 | `web_search_github` | Bing 搜索兜底，免费无限额度 |
 | `list_github_files` | 浏览仓库目录结构 |
 | `read_github_file` | 读取文件内容，自动索引到本地知识库 |
 | `search_code` | 在已读代码中做 FTS5 全文搜索 |
+| `search_history` | 查询同类项目的搜索历史 |
 | `index_status` | 查看本地索引状态 |
 | `db_inspect` | 查看数据库表结构和记录数 |
 | `db_cleanup` | 清理历史数据，释放空间 |
@@ -298,7 +315,6 @@ command = "github-code-rag"
 │  ┌─────────────────────────────────────────────────┐     │
 │  │  系统提示词（需求分析 Agent 方法论）             │     │
 │  │    · 先搜再问 · 逐步收敛 · 复用优先              │     │
-│  │    · 一次只问一个问题 · 来源标注                 │     │
 │  └───────────────────────┬─────────────────────────┘     │
 │                          │ 指导 AI 怎么用工具             │
 │  ┌───────────────────────▼─────────────────────────┐     │
@@ -319,7 +335,7 @@ command = "github-code-rag"
 
 | | FTS5（我们用的） | 向量搜索 |
 |---|---|---|
-| 搜函数名 / 类名 | 精确 | 语义漂移 |
+| 搜函数名 / 类名 / 关键字 | 精确 | 语义漂移 |
 | 搜 "认证怎么实现" | 不行 | 可以 |
 | 额外依赖 | 零（SQLite 内置） | 向量数据库 + Embedding 模型 |
 | 下载体积 | < 1MB | 几十 ~ 几百 MB |
@@ -328,7 +344,8 @@ command = "github-code-rag"
 我们的解法：**两阶段搜索**。
 先用 GitHub Search 找到对的仓库（解决"哪个项目值得参考"），再用 FTS5 在仓库内精确搜代码（解决"具体实现在哪"）。
 
-向量搜索？对代码来说，很多时候是个被过度营销的方案。
+向量搜索？对代码复用场景来说，很多时候是个被过度营销的方案。
+你搜代码的时候脑子里想的是「sessionmaker 怎么用」「JWT 中间件怎么写」，不是「语义上接近认证的东西」。
 
 ---
 
@@ -336,22 +353,21 @@ command = "github-code-rag"
 
 | 特性 | github-code-rag | codedb | codebase-rag | 官方 GitHub MCP |
 |---|---|---|---|---|
-| 需求分析 Agent 引导 | 是 | 否 | 否 | 否 |
-| 强制代码复用方法论 | 是 | 否 | 否 | 否 |
-| 搜索历史 / 分类积累 | 是 | 否 | 否 | 否 |
-| 搜 GitHub 公开仓库 | 是 | 否（仅本地） | 是（需 clone） | 是 |
-| 本地代码索引 | 是（FTS5） | 是（Zig 自研） | 是（FTS5 + 向量） | 否 |
-| 零 git clone | 是 | N/A | 否 | 是 |
-| 免费搜索兜底（Bing） | 是 | 否 | 否 | 否 |
+| 搜 GitHub 公开代码拿来复用 | ✅ | ❌（仅本地） | ✅（需 clone） | ✅ |
+| 零 git clone | ✅ | N/A | ❌ | ✅ |
+| 本地代码索引（FTS5） | ✅ | ✅（Zig 自研） | ✅（FTS5 + 向量） | ❌ |
+| 免费搜索兜底（Bing） | ✅ | ❌ | ❌ | ❌ |
+| 需求分析 Agent 引导 | ✅（附赠） | ❌ | ❌ | ❌ |
+| 强制代码复用方法论 | ✅（附赠） | ❌ | ❌ | ❌ |
+| 搜索历史 / 分类积累 | ✅ | ❌ | ❌ | ❌ |
 | 外部依赖数 | 1（mcp） | 0（单二进制） | 多（Bun + ONNX） | 多 |
 | 启动时间 | < 1s | 极快 | 较慢 | 快 |
 
 一句话总结差异：
 
-- codedb / codebase-rag = 更快更好的代码搜索工具
-- github-code-rag = 带着方法论的需求分析 Agent + 代码搜索
-
-工具谁都能做，但方法论 + 工具才是护城河。
+- codedb / codebase-rag = 搜本地代码的工具
+- 官方 GitHub MCP = GitHub 全能工具箱
+- **github-code-rag = 专门用来抄 GitHub 代码的神器 + 附赠需求分析方法论**
 
 ---
 
@@ -359,7 +375,7 @@ command = "github-code-rag"
 
 ```
 ├── server/
-│   └── mcp_server.py          # MCP 服务器 + 系统提示词（核心方法论）
+│   └── mcp_server.py          # MCP 服务器 + 系统提示词
 ├── github/
 │   └── connector.py           # GitHub API 封装（纯 urllib，零依赖）
 ├── core/
@@ -417,9 +433,13 @@ CODE_RAG_DATA_DIR=~/.code-rag  # 数据存储目录
 
 因为 MCP 工具要对 AI 透明 —— AI 不需要知道你装了什么 CLI，它只需要调用工具就行。而且纯 Python 实现，零系统依赖。
 
+**GitHub API 限流了怎么办？**
+
+自动降级到 Bing 搜索，免费无限额度，不需要额外配置。体验差一点，但不会用不了。
+
 **会加向量搜索吗？**
 
-可能，但不是当前优先级。目前的经验是：先搜对仓库 > 在仓库里精确搜 > 语义搜。向量搜索在代码场景下的实际收益没有营销文案说的那么大。如果你有强烈需求，欢迎提 Issue。
+可能，但不是当前优先级。我们的定位是「快速找到对的代码来复用」，FTS5 + GitHub Search 的两阶段搜索已经能覆盖 90% 的场景。向量搜索在代码复用场景下的实际收益没有营销文案说的那么大。
 
 ---
 
@@ -443,7 +463,7 @@ CODE_RAG_DATA_DIR=~/.code-rag  # 数据存储目录
     ██║   ██║██║   ██║   ██╔══██║██║   ██║██╔══██╗    ██║     ██║   ██║██║  ██║██╔══╝
     ╚██████╔╝██║   ██║   ██║  ██║╚██████╔╝██████╔╝    ╚██████╗╚██████╔╝██████╔╝███████╗
      ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
-        — Search GitHub first, then write code · Stop reinventing wheels —
+       — Steal code from GitHub, ethically · Auto-indexed · Reuse-first —
 </pre></div>
 
 <p align="center">
@@ -455,18 +475,20 @@ CODE_RAG_DATA_DIR=~/.code-rag  # 数据存储目录
 </p>
 
 <p align="center">
-  <strong>Is your AI just guessing when it writes code?</strong><br/>
-  "Build me an e-commerce site" → starts coding → wrong → rewrite → still wrong → exhausted<br/>
+  <strong>Still switching to your browser to search GitHub while coding?</strong><br/>
+  Let your AI search 200M+ public repos directly, find the best implementation, and reuse it with source attribution.<br/>
   <br/>
-  <em>github-code-rag makes your AI research first, ask questions second, and only then build — like a real senior engineer.</em>
+  <em>No cloning, no plugins, no browser tabs — your AI searches GitHub while it codes.</em>
 </p>
 
 ---
 
 ### In One Sentence
 
-An MCP server with a built-in **requirements analysis Agent**.
-Once installed, your Claude / Cursor / Codex won't jump straight into writing code. It searches GitHub for similar projects first, asks clarifying questions based on real-world examples, confirms requirements, and then — and only then — starts building, **reusing code from repos it has read**.
+An MCP server that lets your AI **search and reuse code from GitHub in real time**.
+Writing auth? Search first. Writing middleware? Search first. Writing payment integration? Search first.
+Before AI writes any code, it finds the best implementation on GitHub — **no reinventing the wheel**.
+Also includes a "requirements analysis Agent" methodology so AI researches before building, no guessing.
 
 ---
 
@@ -474,83 +496,92 @@ Once installed, your Claude / Cursor / Codex won't jump straight into writing co
 
 Does this sound familiar?
 
-> "Asked AI to build an admin dashboard. Three rewrites later, it still doesn't get what I want."
+> "Needed an auth module, spent 30 mins Googling, found code of questionable quality."
 
-> "I spent the whole afternoon fixing AI-generated code. Would've been faster to write it myself."
+> "There are great implementations on GitHub, but the AI never searches — it just writes from scratch."
 
-> "It always starts from scratch. There are proven solutions on GitHub, but it never searches."
+> "Every new feature feels like reinventing the wheel when answers are everywhere."
 
-**The problem is the workflow.** Most AI coding follows a broken process:
+**The problem is how AI codes today.**
 
 ```
-Broken: user describes → AI writes directly → wrong → rewrite → still wrong → give up
+Current: AI wants to write → guesses from memory → wrong → rewrite → still wrong
 
-Better: requirements → search similar projects → analyze options → confirm → reuse → build
+Better: AI wants to write → searches GitHub → finds the best → reuses → tweaks → done
 ```
 
-**github-code-rag puts "engineer thinking" inside your MCP.**
+**github-code-rag puts GitHub inside your AI's toolbox.** Search first, reuse second.
 
 ---
 
-### Core Features
+### Core Capabilities
 
-#### "Search First, Ask Later" — No writing without research
+#### 🔥 Real-time GitHub code search & reuse
 
-The system prompt hardcodes the workflow. The AI *must* search GitHub before asking questions. Skipping steps? The tool design makes "write first, search never" harder than doing it right.
+Sorted by stars, finds the most mature projects first. Filter by language and star count.
+
+```
+User: Write a FastAPI database connection module
+    ↓
+AI: search_github("fastapi sqlalchemy database stars:>1000")
+AI: read_github_file("tiangolo/fastapi", "docs_src/sql_app/main.py")
+AI: search_code("create_engine sessionmaker")
+    ↓
+AI: I referenced the FastAPI official example, here you go:
+
+# Source: tiangolo/fastapi/docs_src/sql_app/main.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+...
+```
+
+No browser switching, no cloning repos, no dozens of tabs.
+Your AI **searches GitHub on the fly** while coding, finds the best implementation, reuses it.
+
+#### 📚 Read code auto-indexes, gets better over time
+
+All read repos go into a local FTS5 full-text index. Next time you search for related code, results come back in milliseconds.
+
+```
+→ search_code("jwt authentication middleware")
+  Found 47 matches across 12 indexed repos:
+  - fastapi/.../auth.py:35  JWT bearer middleware
+  - django/.../auth.py:128  Token authentication
+  - ...
+```
+
+The more you use it, the bigger your local code knowledge base gets, the faster AI codes.
+
+#### 🔄 GitHub API + Bing dual fallback
+
+- GitHub Search API: highest quality, sorted by stars (60 req/hr free, 5000 with Token)
+- Bing search fallback: free unlimited quota, auto-degrade on rate limit
+- Zero git clone: all via REST API, no local disk bloat
+
+#### 🧠 Bonus: Requirements Analysis Agent
+
+The system prompt hardcodes a workflow so AI doesn't jump straight into coding.
+It searches similar projects first, asks clarifying questions based on real examples, and only starts building after confirmation.
 
 ```
 User: I want to build a blog system
     ↓
-AI calls search_history("blog system") → no records
-AI calls search_github("blog system python stars:>500")
-    ↓
-AI: Found 10 relevant projects, from 500 stars to 50k stars.
+AI: [searched 10 relevant projects]
     Do you want a standalone blog (like Hugo/Hexo) or a multi-user platform?
      - Standalone blog (simple, great SEO)
      - Multi-user platform (complex features, needs admin backend)
      - Recommend based on GitHub projects
 ```
 
-#### Mandatory Code Reuse — Stop reinventing wheels
+Think of it as "a senior engineer's methodology — included for free."
+You don't have to use it. The code search alone is worth it.
 
-All read code goes into a local knowledge base, searchable at any time.
-**Reuse-first** is an iron rule baked into the system prompt:
+#### ⚡ Zero git clone · Zero vector DB · Only 1 dependency
 
-> "If you can find an existing implementation, don't write from scratch. Violating this rule = invalid output."
-
-Reused code is automatically sourced:
-
-```python
-# Source: tiangolo/fastapi/docs_src/sql_app/main.py
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-```
-
-#### Gets Smarter Over Time — Your personal project knowledge base
-
-Every search is saved to local SQLite. Researched "e-commerce mini program" last time? Start from history this time, no need to search again.
-
-```
-→ search_history("e-commerce mini program")
-  Category 'e-commerce mini program' previously read repos:
-    - justjavac/wechat-app-eshop (JavaScript) @ 2026-03-15
-    - xxx/shop-wxapp (TypeScript) @ 2026-03-14
-  → Has records, use search_code for specific implementations
-```
-
-#### GitHub API + Bing Dual Fallback
-
-- GitHub Search API: high quality, sorted by stars (60 req/hr free, 5000 with Token)
-- Bing search fallback: free, unlimited quota, no API key needed
-- Auto-degrade on rate limit — no manual intervention
-
-#### Zero git clone · Zero vector DB · Only 1 dependency
-
-- All via GitHub REST API — no need to clone repos locally
-- SQLite + FTS5 full-text index — no vector database or embedding model needed
+- All via GitHub REST API — no repo cloning needed
+- SQLite + FTS5 full-text index — no vector DB or embeddings
 - Runtime depends only on `mcp>=1.0`, everything else is Python stdlib
-- Startup < 1 second, memory footprint < 50MB
+- Startup < 1 second, memory < 50MB
 
 ---
 
@@ -558,12 +589,12 @@ Every search is saved to local SQLite. Researched "e-commerce mini program" last
 
 | | Without github-code-rag | With github-code-rag |
 |---|---|---|
-| AI dives into code | Writes nonstop | Searches GitHub first |
-| Requirement understanding | Guesses | Confirms iteratively based on real projects |
-| Code quality | Writes from scratch | Reuses the best from 20M+ GitHub repos |
-| Pitfalls | Steps in every one | Skips what others already learned |
-| Each new project | Fresh start every time | Accumulates more over time |
+| Searching GitHub before coding | Manually in browser | AI does it automatically |
+| Code source | From model memory | The best from 200M+ GitHub repos |
+| Code quality | Depends on model ability | Standing on the shoulders of open source |
 | Source attribution | No idea who wrote what | Auto-tagged `# Source: owner/repo/file.py` |
+| Each new feature | Starts from scratch | Local knowledge base keeps growing |
+| GitHub rate limiting | — | Bing auto-fallback, unlimited |
 
 ---
 
@@ -594,6 +625,14 @@ With a token, GitHub API quota goes from 60 req/hr → 5000 req/hr.
 #### 3. Configure your AI client
 
 See the "Client Setup" section below.
+
+#### 4. Try this
+
+After installation, tell your AI:
+
+> "Write a FastAPI JWT auth middleware. First search GitHub for the best implementation to reference."
+
+Watch whether it searches GitHub before writing code.
 
 ---
 
@@ -709,12 +748,12 @@ Edit the mcp servers section in OpenCode config:
 
 | Tool | Description |
 |---|---|
-| `search_history` | Query search history for similar projects (first step for every requirement) |
 | `search_github` | GitHub official API repo search, sorted by stars |
 | `web_search_github` | Bing search fallback, free unlimited quota |
 | `list_github_files` | Browse repo directory structure |
 | `read_github_file` | Read file content, auto-index to local knowledge base |
 | `search_code` | FTS5 full-text search across indexed code |
+| `search_history` | Query search history for similar projects |
 | `index_status` | View local index status |
 | `db_inspect` | Inspect database schema and record counts |
 | `db_cleanup` | Clean up historical data, free space |
@@ -755,7 +794,7 @@ Edit the mcp servers section in OpenCode config:
 
 | | FTS5 (what we use) | Vector search |
 |---|---|---|
-| Function/class name search | Precise | Semantic drift |
+| Function/class/keyword search | Precise | Semantic drift |
 | "How to implement auth" | No | Yes |
 | Extra dependencies | Zero (SQLite built-in) | Vector DB + Embedding model |
 | Download size | < 1MB | Tens ~ hundreds of MB |
@@ -764,7 +803,8 @@ Edit the mcp servers section in OpenCode config:
 Our approach: **two-phase search**.
 First use GitHub Search to find the right repos ("which project is worth referencing"), then use FTS5 to pinpoint code inside repos ("where's the implementation").
 
-Vector search? For code, it's often an oversold solution.
+Vector search? For code reuse, it's often an oversold solution.
+When you search code, you think "how to use sessionmaker" or "how to write JWT middleware" — not "things semantically similar to authentication."
 
 ---
 
@@ -772,22 +812,21 @@ Vector search? For code, it's often an oversold solution.
 
 | Feature | github-code-rag | codedb | codebase-rag | Official GitHub MCP |
 |---|---|---|---|---|
-| Requirements analysis Agent guidance | Yes | No | No | No |
-| Mandatory code reuse methodology | Yes | No | No | No |
-| Search history / category accumulation | Yes | No | No | No |
-| Search public GitHub repos | Yes | No (local only) | Yes (needs clone) | Yes |
-| Local code indexing | Yes (FTS5) | Yes (Zig custom) | Yes (FTS5 + vector) | No |
-| Zero git clone | Yes | N/A | No | Yes |
-| Free search fallback (Bing) | Yes | No | No | No |
+| Search & reuse public GitHub code | ✅ | ❌ (local only) | ✅ (needs clone) | ✅ |
+| Zero git clone | ✅ | N/A | ❌ | ✅ |
+| Local code indexing (FTS5) | ✅ | ✅ (Zig custom) | ✅ (FTS5 + vector) | ❌ |
+| Free search fallback (Bing) | ✅ | ❌ | ❌ | ❌ |
+| Requirements analysis Agent | ✅ (bonus) | ❌ | ❌ | ❌ |
+| Mandatory reuse methodology | ✅ (bonus) | ❌ | ❌ | ❌ |
+| Search history / categories | ✅ | ❌ | ❌ | ❌ |
 | External dependencies | 1 (mcp) | 0 (single binary) | Many (Bun + ONNX) | Many |
 | Startup time | < 1s | Very fast | Slow | Fast |
 
 In one sentence:
 
-- codedb / codebase-rag = faster, better code search tools
-- github-code-rag = methodology-driven requirements analysis Agent + code search
-
-Anyone can build tools. Methodology + tools is the moat.
+- codedb / codebase-rag = tools for searching local code
+- Official GitHub MCP = Swiss Army knife for GitHub
+- **github-code-rag = purpose-built for reusing GitHub code + bonus methodology Agent**
 
 ---
 
@@ -795,7 +834,7 @@ Anyone can build tools. Methodology + tools is the moat.
 
 ```
 ├── server/
-│   └── mcp_server.py          # MCP server + system prompt (core methodology)
+│   └── mcp_server.py          # MCP server + system prompt
 ├── github/
 │   └── connector.py           # GitHub API wrapper (pure urllib, zero deps)
 ├── core/
@@ -853,9 +892,13 @@ No. All indexes are stored in local SQLite. The GitHub API only reads public rep
 
 Because MCP tools should be transparent to the AI — it doesn't need to know what CLI you have installed, it just calls tools. Plus pure Python implementation, zero system dependencies.
 
+**What if GitHub API is rate limited?**
+
+Auto-degrades to Bing search. Free, unlimited quota, no extra config needed. Experience is slightly degraded, but it never stops working.
+
 **Will you add vector search?**
 
-Maybe, but it's not the current priority. Our experience so far: find the right repo first > precise search within repo > semantic search. The actual benefit of vector search for code isn't as big as marketing claims. If you have strong demand, feel free to open an Issue.
+Maybe, but it's not the current priority. Our focus is "quickly find the right code to reuse." The two-phase search (GitHub Search + FTS5) already covers 90% of use cases. The actual benefit of vector search for code reuse isn't as big as marketing claims suggest.
 
 ---
 
