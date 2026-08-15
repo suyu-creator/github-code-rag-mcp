@@ -94,10 +94,10 @@ AI 写代码时**顺手**就去 GitHub 搜了，找到最好的实现直接复�
 
 用得越久，你的本地代码知识库越大，AI 写代码越快。
 
-### 🔄 GitHub API + Bing 双路兜底，不怕限流
+### 🔄 GitHub API + 官方搜索页双路兜底，不怕限流
 
 - GitHub Search API：质量最高，按 star 排序（60 次/时免费，配 Token 5000 次/时）
-- Bing 搜索兜底：免费无限额度，限流自动降级
+- GitHub 官方搜索页兜底：免费无限额度，限流自动降级
 - 零 git clone：全部走 REST API，不占本地磁盘
 
 ### 🧠 附赠：需求分析 Agent —— 先调研再动手
@@ -136,7 +136,7 @@ AI：[搜了 10 个相关项目]
 | 代码质量 | 全靠模型水平 | 站在开源巨人肩膀上 |
 | 来源标注 | 不知道抄的谁的 | 自动标注 `# Source: owner/repo/file.py` |
 | 每次写新功能 | 从零开始 | 本地知识库越攒越多 |
-| GitHub 限流 | — | Bing 自动兜底，无限额度 |
+| GitHub 限流 | — | 官方搜索页兜底，无限额度 |
 
 ---
 
@@ -161,7 +161,7 @@ pip install github-code-rag
 export GITHUB_TOKEN=ghp_your_token_here
 ```
 
-没有 Token 也能用 —— 内置 Bing 搜索兜底，免费无限额度。
+没有 Token 也能用 —— 内置 GitHub 官方搜索页兜底，免费无限额度。
 有 Token 的话 GitHub API 额度从 60 次/时 → 5000 次/时。
 
 ### 3. 配置到你的 AI 客户端
@@ -291,7 +291,7 @@ command = "github-code-rag"
 | 工具 | 说明 |
 |---|---|
 | `search_github` | GitHub 官方 API 搜索仓库，按 star 排序 |
-| `web_search_github` | Bing 搜索兜底，免费无限额度 |
+| `web_search_github` | GitHub 官方搜索页兜底，免费无限额度 |
 | `list_github_files` | 浏览仓库目录结构 |
 | `read_github_file` | 读取文件内容，自动索引到本地知识库 |
 | `search_code` | 在已读代码中做 FTS5 全文搜索 |
@@ -324,7 +324,7 @@ command = "github-code-rag"
 │              │                           │               │
 │ ┌────────────▼───────────┐   ┌───────────▼──────────┐    │
 │ │  GitHub REST API       │   │  SQLite + FTS5       │    │
-│ │  + Bing 搜索兜底       │   │  本地代码知识库       │    │
+│ │  + GitHub 搜索页兜底   │   │  本地代码知识库       │    │
 │ │  零 git clone          │   │  Trigram 全文搜索     │    │
 │ └────────────────────────┘   └──────────────────────┘    │
 │                                                           │
@@ -356,7 +356,7 @@ command = "github-code-rag"
 | 搜 GitHub 公开代码拿来复用 | ✅ | ❌（仅本地） | ✅（需 clone） | ✅ |
 | 零 git clone | ✅ | N/A | ❌ | ✅ |
 | 本地代码索引（FTS5） | ✅ | ✅（Zig 自研） | ✅（FTS5 + 向量） | ❌ |
-| 免费搜索兜底（Bing） | ✅ | ❌ | ❌ | ❌ |
+| 免费搜索兜底（GitHub 搜索页） | ✅ | ❌ | ❌ | ❌ |
 | 需求分析 Agent 引导 | ✅（附赠） | ❌ | ❌ | ❌ |
 | 强制代码复用方法论 | ✅（附赠） | ❌ | ❌ | ❌ |
 | 搜索历史 / 分类积累 | ✅ | ❌ | ❌ | ❌ |
@@ -435,7 +435,7 @@ CODE_RAG_DATA_DIR=~/.code-rag  # 数据存储目录
 
 **GitHub API 限流了怎么办？**
 
-自动降级到 Bing 搜索，免费无限额度，不需要额外配置。体验差一点，但不会用不了。
+自动降级到 GitHub 官方搜索页，免费无限额度，不需要额外配置。体验差一点，但不会用不了。
 
 **会加向量搜索吗？**
 
@@ -552,10 +552,10 @@ All read repos go into a local FTS5 full-text index. Next time you search for re
 
 The more you use it, the bigger your local code knowledge base gets, the faster AI codes.
 
-#### 🔄 GitHub API + Bing dual fallback
+#### 🔄 GitHub API + official search page dual fallback
 
 - GitHub Search API: highest quality, sorted by stars (60 req/hr free, 5000 with Token)
-- Bing search fallback: free unlimited quota, auto-degrade on rate limit
+- GitHub official search page fallback: free unlimited quota, auto-degrade on rate limit
 - Zero git clone: all via REST API, no local disk bloat
 
 #### 🧠 Bonus: Requirements Analysis Agent
@@ -594,7 +594,7 @@ You don't have to use it. The code search alone is worth it.
 | Code quality | Depends on model ability | Standing on the shoulders of open source |
 | Source attribution | No idea who wrote what | Auto-tagged `# Source: owner/repo/file.py` |
 | Each new feature | Starts from scratch | Local knowledge base keeps growing |
-| GitHub rate limiting | — | Bing auto-fallback, unlimited |
+| GitHub rate limiting | — | Official search page fallback, unlimited |
 
 ---
 
@@ -619,7 +619,7 @@ pip install github-code-rag
 export GITHUB_TOKEN=ghp_your_token_here
 ```
 
-Works without a token — built-in Bing search fallback, free and unlimited.
+Works without a token — built-in GitHub official search page fallback, free and unlimited.
 With a token, GitHub API quota goes from 60 req/hr → 5000 req/hr.
 
 #### 3. Configure your AI client
@@ -749,7 +749,7 @@ Edit the mcp servers section in OpenCode config:
 | Tool | Description |
 |---|---|
 | `search_github` | GitHub official API repo search, sorted by stars |
-| `web_search_github` | Bing search fallback, free unlimited quota |
+| `web_search_github` | GitHub official search page fallback, free unlimited quota |
 | `list_github_files` | Browse repo directory structure |
 | `read_github_file` | Read file content, auto-index to local knowledge base |
 | `search_code` | FTS5 full-text search across indexed code |
@@ -783,7 +783,7 @@ Edit the mcp servers section in OpenCode config:
 │              │                           │               │
 │ ┌────────────▼───────────┐   ┌───────────▼──────────┐    │
 │ │  GitHub REST API       │   │  SQLite + FTS5       │    │
-│ │  + Bing fallback       │   │  Local code KB       │    │
+│ │  + GitHub search page  │   │  Local code KB       │    │
 │ │  Zero git clone        │   │  Trigram FTS         │    │
 │ └────────────────────────┘   └──────────────────────┘    │
 │                                                           │
@@ -815,7 +815,7 @@ When you search code, you think "how to use sessionmaker" or "how to write JWT m
 | Search & reuse public GitHub code | ✅ | ❌ (local only) | ✅ (needs clone) | ✅ |
 | Zero git clone | ✅ | N/A | ❌ | ✅ |
 | Local code indexing (FTS5) | ✅ | ✅ (Zig custom) | ✅ (FTS5 + vector) | ❌ |
-| Free search fallback (Bing) | ✅ | ❌ | ❌ | ❌ |
+| Free search fallback (GitHub page) | ✅ | ❌ | ❌ | ❌ |
 | Requirements analysis Agent | ✅ (bonus) | ❌ | ❌ | ❌ |
 | Mandatory reuse methodology | ✅ (bonus) | ❌ | ❌ | ❌ |
 | Search history / categories | ✅ | ❌ | ❌ | ❌ |
@@ -894,7 +894,7 @@ Because MCP tools should be transparent to the AI — it doesn't need to know wh
 
 **What if GitHub API is rate limited?**
 
-Auto-degrades to Bing search. Free, unlimited quota, no extra config needed. Experience is slightly degraded, but it never stops working.
+Auto-degrades to GitHub official search page. Free, unlimited quota, no extra config needed. Experience is slightly degraded, but it never stops working.
 
 **Will you add vector search?**
 
