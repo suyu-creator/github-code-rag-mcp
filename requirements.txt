@@ -2,3 +2,6 @@
 # FTS5 full-text search + search history — no embeddings, no graph, no tree-sitter
 
 mcp>=1.0.0
+
+# Dev / testing
+pytest

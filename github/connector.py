@@ -47,12 +47,12 @@ class GitHubConnector:
 
         owner = parts[0] if len(parts) > 0 else ""
         repo = parts[1] if len(parts) > 1 else ""
-        ref = "main"
+        ref = ""
         file_path = ""
 
-        if len(parts) > 2:
+        if len(parts) > 2 and parts[2] in ("tree", "blob"):
             # /owner/repo/tree/main/path or /owner/repo/blob/main/path
-            ref = parts[3] if len(parts) > 3 else "main"
+            ref = parts[3] if len(parts) > 3 else ""
             file_path = "/".join(parts[4:]) if len(parts) > 4 else ""
 
         return owner, repo, ref, file_path
@@ -76,7 +76,13 @@ class GitHubConnector:
             if e.code == 404:
                 return None
             if e.code == 403:
-                raise RateLimitError("GitHub API rate limit exceeded")
+                # 403 can mean rate-limit OR a blocked repo / abuse detection.
+                # Only treat it as rate limiting when the header confirms the
+                # quota is actually exhausted; otherwise surface as None.
+                remaining = e.headers.get("X-RateLimit-Remaining", "")
+                if remaining.isdigit() and int(remaining) == 0:
+                    raise RateLimitError("GitHub API rate limit exceeded")
+                return None
             return None
         except (urllib.error.URLError, TimeoutError, OSError):
             return None  # Network unavailable
@@ -102,12 +108,14 @@ class GitHubConnector:
         Returns:
             List of {name, type, path} dicts, or None on error
         """
-        owner, repo, _, extracted_path = self.parse_repo_url(url)
+        owner, repo, ref, extracted_path = self.parse_repo_url(url)
         if not path:
             path = extracted_path
 
         api_path = path.strip("/")
         api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{api_path}" if api_path else f"https://api.github.com/repos/{owner}/{repo}/contents"
+        if ref:
+            api_url += f"?ref={urllib.parse.quote(ref)}"
 
         result = self._api_request(api_url)
         if result is None:
@@ -136,9 +144,11 @@ class GitHubConnector:
         Returns:
             File content as string, or None on error
         """
-        owner, repo, _, _ = self.parse_repo_url(url)
+        owner, repo, ref, _ = self.parse_repo_url(url)
 
         api_path = f"https://api.github.com/repos/{owner}/{repo}/contents/{path.strip('/')}"
+        if ref:
+            api_path += f"?ref={urllib.parse.quote(ref)}"
         result = self._api_request(api_path)
 
         if result is None or not isinstance(result, dict):

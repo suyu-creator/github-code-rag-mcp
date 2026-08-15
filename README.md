@@ -387,8 +387,7 @@ command = "github-code-rag"
 │   ├── test_retrieval.py
 │   └── test_storage.py
 ├── .well-known/mcp.json       # SSE 模式配置
-├── pyproject.toml
-└── run_server.py
+└── pyproject.toml
 ```
 
 ---
@@ -846,8 +845,7 @@ In one sentence:
 │   ├── test_retrieval.py
 │   └── test_storage.py
 ├── .well-known/mcp.json       # SSE mode config
-├── pyproject.toml
-└── run_server.py
+└── pyproject.toml
 ```
 
 ---

@@ -9,12 +9,15 @@ Reference: srclight db.py, dinosn/claude-recall
 
 from __future__ import annotations
 
+import logging
 import os
 import sqlite3
 import time
 from typing import List, Optional, Tuple
 
 from core.models import RepoInfo, SearchHistory, SearchResult
+
+logger = logging.getLogger("code_rag.storage")
 
 
 # Common directories to skip when indexing repos
@@ -187,12 +190,15 @@ class Storage:
         Returns:
             List of SearchResult with matched file paths and snippets
         """
-        # Build FTS5 query: match individual words across content
-        words = [w.strip() for w in query.split() if len(w.strip()) >= 2]
+        # Build FTS5 query: match individual words across content.
+        # FTS5 trigram tokenizer needs at least 3 chars per token.
+        words = [w.strip() for w in query.split() if len(w.strip()) >= 3]
         if not words:
             return []
 
-        fts_query = " OR ".join(words)
+        # Quote each word so FTS5 syntax chars (- . + " : *) are treated as
+        # literals instead of operators; double quotes inside need doubling.
+        fts_query = " OR ".join('"' + w.replace('"', '""') + '"' for w in words)
 
         try:
             sql = """
@@ -220,7 +226,8 @@ class Storage:
                 params = [fts_query, repo, top_k * 2]
 
             rows = self._get_conn().execute(sql, params).fetchall()
-        except sqlite3.OperationalError:
+        except sqlite3.OperationalError as e:
+            logger.warning("FTS5 query failed (%s): %r", e, fts_query)
             return []
 
         results = []
@@ -363,6 +370,17 @@ class Storage:
         conn.execute("DELETE FROM repos WHERE name = ?", (repo_name,))
         conn.execute("DELETE FROM search_history WHERE repo_name = ?", (repo_name,))
         conn.execute("DELETE FROM files WHERE repo = ?", (repo_name,))
+        conn.commit()
+
+    def update_file_count(self, repo: str) -> None:
+        """Sync repos.file_count with the actual number of indexed files."""
+        conn = self._get_conn()
+        conn.execute(
+            """UPDATE repos
+               SET file_count = (SELECT COUNT(*) FROM files WHERE repo = ?)
+               WHERE name = ?""",
+            (repo, repo),
+        )
         conn.commit()
 
     def get_stats(self) -> dict:

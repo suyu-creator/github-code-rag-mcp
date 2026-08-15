@@ -229,6 +229,7 @@ def read_github_file(url: str, path: str) -> str:
             file_count=0,
         ))
         _storage.index_file(repo_name, path, content)
+        _storage.update_file_count(repo_name)
     except Exception:
         pass  # Indexing is best-effort
 
