@@ -31,6 +31,15 @@ _github: Optional[GitHubConnector] = None
 
 # ── MCP Server ──────────────────────────────────────────────────────
 
+# Resolve FastMCP's internal Settings forward refs so pydantic-settings
+# does not print an IncompleteFieldDefinitionWarning to stderr at startup.
+# On CJK Windows that stderr is GBK-encoded (non-UTF-8) and makes the MCP
+# client abort the stdio handshake, so keep stderr clean.
+from mcp.server.fastmcp.server import Settings
+
+Settings.model_rebuild()
+logging.getLogger("mcp").setLevel(logging.WARNING)
+
 mcp = FastMCP(
     "github-code-rag",
     instructions="""# 需求分析 Agent - 先判断再搜或问
