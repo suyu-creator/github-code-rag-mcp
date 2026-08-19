@@ -5,6 +5,68 @@
     ██║   ██║██║   ██║   ██╔══██║██║   ██║██╔══██╗    ██║     ██║   ██║██║  ██║██╔══╝
     ╚██████╔╝██║   ██║   ██║  ██║╚██████╔╝██████╔╝    ╚██████╗╚██████╔╝██████╔╝███████╗
      ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+       — Let AI search GitHub repos · Star-sorted · Dual-channel fallback —
+</pre></div>
+
+### In One Sentence
+
+An MCP server that lets your AI **search GitHub repositories in real time**.
+Writing auth? Search first. Writing middleware? Search first. Writing payment integration? Search first.
+Before AI writes any code, it finds the best projects on GitHub — **no reinventing the wheel**.
+Also includes a "requirements analysis Agent" methodology so AI researches before answering, no guessing.
+
+### Core Capabilities
+
+- **Real-time GitHub repo search** — sorted by stars, filterable by language and star count.
+- **Read files from any repo** — `read_github_file` fetches file content with automatic source attribution.
+- **Dual-channel fallback** — GitHub Search API first; auto-degrade to the official search page (free, unlimited) on rate limits.
+- **Bonus: Requirements Analysis Agent** — the system prompt hardcodes a workflow so AI judges requirement clarity, searches first, and asks one question at a time before concluding.
+- **Zero git clone · 1 dependency** — all via GitHub REST API; only `mcp>=1.0` at runtime; starts in < 1s.
+
+### Tools
+
+| Tool | Description |
+|---|---|
+| `search_github` | GitHub official API repo search, sorted by stars |
+| `web_search_github` | GitHub official search page fallback, free unlimited quota |
+| `read_github_file` | Read file content from a repo, with source attribution |
+
+### Development
+
+```bash
+git clone https://github.com/suyu-creator/github-code-rag-mcp.git
+cd github-code-rag-mcp
+uv sync
+uv run --with pytest pytest
+uv run github-code-rag
+```
+
+**Environment variables:**
+
+```
+GITHUB_TOKEN=ghp_xxx           # GitHub API Token (recommended)
+```
+
+---
+
+## 参与贡献
+
+- 发现 Bug → 提 Issue
+- 有新想法 → 先开 Issue 讨论
+- 代码贡献 → Fork + PR
+- 觉得好用 → 点个 star，让更多人看到
+
+---
+
+## 中文
+
+<div align="center"><pre>
+     ██████╗ ██╗████████╗██╗  ██╗██╗   ██╗██████╗      ██████╗ ██████╗ ██████╗ ███████╗
+    ██╔════╝ ██║╚══██╔══╝██║  ██║██║   ██║██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
+    ██║  ███╗██║   ██║   ███████║██║   ██║██████╔╝    ██║     ██║   ██║██║  ██║█████╗
+    ██║   ██║██║   ██║   ██╔══██║██║   ██║██╔══██╗    ██║     ██║   ██║██║  ██║██╔══╝
+    ╚██████╔╝██║   ██║   ██║  ██║╚██████╔╝██████╔╝    ╚██████╗╚██████╔╝██████╔╝███████╗
+     ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
         — 让 AI 直接搜 GitHub 仓库 · 按 star 排序 · 双通道兜底 —
 </pre></div>
 
@@ -288,63 +350,3 @@ GITHUB_TOKEN=ghp_xxx           # GitHub API Token（推荐）
 自动降级到 GitHub 官方搜索页，免费无限额度，不需要额外配置。
 
 ---
-
-## English
-
-<div align="center"><pre>
-     ██████╗ ██╗████████╗██╗  ██╗██╗   ██╗██████╗      ██████╗ ██████╗ ██████╗ ███████╗
-    ██╔════╝ ██║╚══██╔══╝██║  ██║██║   ██║██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
-    ██║  ███╗██║   ██║   ███████║██║   ██║██████╔╝    ██║     ██║   ██║██║  ██║█████╗
-    ██║   ██║██║   ██║   ██╔══██║██║   ██║██╔══██╗    ██║     ██║   ██║██║  ██║██╔══╝
-    ╚██████╔╝██║   ██║   ██║  ██║╚██████╔╝██████╔╝    ╚██████╗╚██████╔╝██████╔╝███████╗
-     ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
-       — Let AI search GitHub repos · Star-sorted · Dual-channel fallback —
-</pre></div>
-
-### In One Sentence
-
-An MCP server that lets your AI **search GitHub repositories in real time**.
-Writing auth? Search first. Writing middleware? Search first. Writing payment integration? Search first.
-Before AI writes any code, it finds the best projects on GitHub — **no reinventing the wheel**.
-Also includes a "requirements analysis Agent" methodology so AI researches before answering, no guessing.
-
-### Core Capabilities
-
-- **Real-time GitHub repo search** — sorted by stars, filterable by language and star count.
-- **Read files from any repo** — `read_github_file` fetches file content with automatic source attribution.
-- **Dual-channel fallback** — GitHub Search API first; auto-degrade to the official search page (free, unlimited) on rate limits.
-- **Bonus: Requirements Analysis Agent** — the system prompt hardcodes a workflow so AI judges requirement clarity, searches first, and asks one question at a time before concluding.
-- **Zero git clone · 1 dependency** — all via GitHub REST API; only `mcp>=1.0` at runtime; starts in < 1s.
-
-### Tools
-
-| Tool | Description |
-|---|---|
-| `search_github` | GitHub official API repo search, sorted by stars |
-| `web_search_github` | GitHub official search page fallback, free unlimited quota |
-| `read_github_file` | Read file content from a repo, with source attribution |
-
-### Development
-
-```bash
-git clone https://github.com/suyu-creator/github-code-rag-mcp.git
-cd github-code-rag-mcp
-uv sync
-uv run --with pytest pytest
-uv run github-code-rag
-```
-
-**Environment variables:**
-
-```
-GITHUB_TOKEN=ghp_xxx           # GitHub API Token (recommended)
-```
-
----
-
-## 参与贡献
-
-- 发现 Bug → 提 Issue
-- 有新想法 → 先开 Issue 讨论
-- 代码贡献 → Fork + PR
-- 觉得好用 → 点个 star，让更多人看到
