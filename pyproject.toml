@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "github-code-rag"
 version = "0.1.0"
-description = "MCP Server for GitHub code search with FTS5 + search history"
+description = "MCP Server for GitHub repository search"
 authors = [
-    {name = "github-code-rag"},
+    {name = "suyu-creator"},
 ]
 license = {text = "MIT"}
 requires-python = ">=3.10"
@@ -19,7 +19,7 @@ dependencies = [
 github-code-rag = "server.mcp_server:main"
 
 [tool.setuptools.packages.find]
-include = ["core*", "storage*", "server*", "github*"]
+include = ["core*", "server*", "github*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

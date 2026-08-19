@@ -6,9 +6,9 @@
       "args": ["run", "github-code-rag"],
       "transport": "stdio",
       "metadata": {
-        "name": "GitHub Code Search",
-        "description": "Search and reuse code from GitHub repositories with FTS5 full-text search and search history tracking",
-        "categories": ["code-search", "code-reuse", "rag"]
+        "name": "GitHub Repo Search",
+        "description": "Search GitHub repositories via API with star-sorted results and a free search-page fallback",
+        "categories": ["code-search", "code-reuse"]
       }
     }
   }

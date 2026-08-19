@@ -1,4 +1,4 @@
-"""GitHub repository connector for browsing and reading files via API.
+"""GitHub repository connector — search repos and read files via REST API.
 
 No git clone needed. Uses GitHub REST API directly.
 """
@@ -11,7 +11,7 @@ import os
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from core.models import RepoInfo
@@ -23,7 +23,7 @@ class RateLimitError(Exception):
 
 
 class GitHubConnector:
-    """Browse GitHub repos and read files via REST API."""
+    """Search GitHub repositories and read files via the REST API."""
 
     def __init__(self, github_token: str = ""):
         self.github_token = github_token or os.environ.get("GITHUB_TOKEN", "")
@@ -47,12 +47,12 @@ class GitHubConnector:
 
         owner = parts[0] if len(parts) > 0 else ""
         repo = parts[1] if len(parts) > 1 else ""
-        ref = "main"
+        ref = ""
         file_path = ""
 
-        if len(parts) > 2:
+        if len(parts) > 2 and parts[2] in ("tree", "blob"):
             # /owner/repo/tree/main/path or /owner/repo/blob/main/path
-            ref = parts[3] if len(parts) > 3 else "main"
+            ref = parts[3] if len(parts) > 3 else ""
             file_path = "/".join(parts[4:]) if len(parts) > 4 else ""
 
         return owner, repo, ref, file_path
@@ -73,58 +73,18 @@ class GitHubConnector:
             with urllib.request.urlopen(req, timeout=10) as resp:
                 return json.loads(resp.read())
         except urllib.error.HTTPError as e:
-            if e.code == 404:
-                return None
             if e.code == 403:
-                raise RateLimitError("GitHub API rate limit exceeded")
+                # 403 can mean rate-limit OR a blocked repo / abuse detection.
+                # Only treat it as rate limiting when the header confirms the
+                # quota is actually exhausted; otherwise surface as None.
+                remaining = e.headers.get("X-RateLimit-Remaining", "")
+                if remaining.isdigit() and int(remaining) == 0:
+                    raise RateLimitError("GitHub API rate limit exceeded")
             return None
         except (urllib.error.URLError, TimeoutError, OSError):
             return None  # Network unavailable
 
-    def _get_default_branch(self, owner: str, repo: str) -> str:
-        """Get the default branch for a repo."""
-        data = self._api_request(
-            f"https://api.github.com/repos/{owner}/{repo}"
-        )
-        if data:
-            return data.get("default_branch", "main")
-        return "main"
-
-    # ── File browsing ─────────────────────────────────────────────────
-
-    def list_files(self, url: str, path: str = "") -> Optional[List[Dict[str, Any]]]:
-        """List files and directories in a GitHub repository path.
-
-        Args:
-            url: GitHub repository URL (e.g. https://github.com/owner/repo)
-            path: Subdirectory path (empty for root)
-
-        Returns:
-            List of {name, type, path} dicts, or None on error
-        """
-        owner, repo, _, extracted_path = self.parse_repo_url(url)
-        if not path:
-            path = extracted_path
-
-        api_path = path.strip("/")
-        api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{api_path}" if api_path else f"https://api.github.com/repos/{owner}/{repo}/contents"
-
-        result = self._api_request(api_url)
-        if result is None:
-            return None
-
-        items = []
-        for item in result if isinstance(result, list) else [result]:
-            name = item.get("name", "")
-            item_type = item.get("type", "")
-            item_path = item.get("path", "")
-            items.append({
-                "name": name,
-                "type": item_type,  # "file" or "dir"
-                "path": item_path,
-            })
-
-        return items
+    # ── File reading ──────────────────────────────────────────────────
 
     def read_file(self, url: str, path: str) -> Optional[str]:
         """Read a file's content from a GitHub repository.
@@ -136,9 +96,11 @@ class GitHubConnector:
         Returns:
             File content as string, or None on error
         """
-        owner, repo, _, _ = self.parse_repo_url(url)
+        owner, repo, ref, _ = self.parse_repo_url(url)
 
         api_path = f"https://api.github.com/repos/{owner}/{repo}/contents/{path.strip('/')}"
+        if ref:
+            api_path += f"?ref={urllib.parse.quote(ref)}"
         result = self._api_request(api_path)
 
         if result is None or not isinstance(result, dict):
@@ -161,7 +123,7 @@ class GitHubConnector:
     def search_repos(
         self, query: str, limit: int = 10
     ) -> Optional[List[RepoInfo]]:
-        """Search GitHub for repositories matching the query.
+        """Search GitHub for repositories matching the query, sorted by stars.
 
         Args:
             query: Search query
@@ -187,6 +149,5 @@ class GitHubConnector:
                 language=item.get("language") or "",
                 stars=item.get("stargazers_count", 0),
                 description=item.get("description") or "",
-                file_count=0,
             ))
         return repos
