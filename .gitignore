@@ -28,6 +28,3 @@ htmlcov/
 Thumbs.db
 .DS_Store
 
-# Project specific
-*.db
-*.sqlite3

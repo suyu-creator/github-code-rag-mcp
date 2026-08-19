@@ -1,5 +1,4 @@
-# GitHub Code RAG MCP Server
-# FTS5 full-text search + search history — no embeddings, no graph, no tree-sitter
+# GitHub Repository Search MCP Server
 
 mcp>=1.0.0
 
