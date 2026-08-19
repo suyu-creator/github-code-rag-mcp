@@ -90,11 +90,11 @@ mcp = FastMCP(
 4. **用户最新说的为准** — 约束条件以用户最新修改为准
 5. **用户没提规模时,搜的时候带上不同规模的关键词去匹配**
 6. **只汇报工具实际返回的内容** — 不要编造不存在的仓库、star 数或描述
+7. **强烈优先用 MCP 自带工具**（search_github / web_search_github / read_github_file）— 质量高、免手动解析;不强制禁用 gh CLI / curl,但 MCP 不可用时才用它们兜底
 
 ## 禁止行为
 - 不要一次问多个问题
 - 不要输出长篇技术解释(除非用户要求)
-- 不要用 gh CLI 或 curl 代替 MCP 工具
 - ⚠️ 需求不明确时不要硬猜,先问 1-2 个小问题
 """,
 )
@@ -106,8 +106,8 @@ mcp = FastMCP(
 def search_github(query: str, limit: int = 10) -> str:
     """在 GitHub 搜索仓库，返回仓库 URL。
 
-    这是搜索 GitHub 的唯一途径，禁止使用 gh CLI 或 curl。
-    按 star 排序，优先找到最成熟的项目。
+    这是搜索 GitHub 的首选途径，强烈优先使用本工具;不强制禁用 gh CLI / curl,
+    但 MCP 工具不可用时才用它们兜底。按 star 排序，优先找到最成熟的项目。
 
     Args:
         query: Search keywords (中文或英文均可，可带筛选如 "python stars:>1000")
