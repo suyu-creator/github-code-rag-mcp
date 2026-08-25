@@ -15,6 +15,7 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from github.connector import GitHubConnector, RateLimitError
+from github.keywords import build_search_query
 
 logger = logging.getLogger("code_rag.server")
 
@@ -109,6 +110,9 @@ def search_github(query: str, limit: int = 10) -> str:
     这是搜索 GitHub 的首选途径，强烈优先使用本工具;不强制禁用 gh CLI / curl,
     但 MCP 工具不可用时才用它们兜底。按 star 排序，优先找到最成熟的项目。
 
+    中文关键词会自动翻译成英文技术关键词并追加 star 过滤（如 "电商网站" →
+    "ecommerce stars:>50"），因为 GitHub 对中文相关性排序不可靠。
+
     Args:
         query: Search keywords (中文或英文均可，可带筛选如 "python stars:>1000")
         limit: Maximum results (default: 10, max: 30)
@@ -120,8 +124,10 @@ def search_github(query: str, limit: int = 10) -> str:
 
     limit = min(limit, 30)
 
+    final_query, was_translated = build_search_query(query)
+
     try:
-        repos = _github.search_repos(query, limit=limit)
+        repos = _github.search_repos(final_query, limit=limit)
     except RateLimitError:
         return (
             "GitHub API 额度已用完，没有 token 的话每小时只能搜 60 次。\n\n"
@@ -138,7 +144,10 @@ def search_github(query: str, limit: int = 10) -> str:
     if not repos:
         return "没有找到匹配的仓库，试试其他关键词。"
 
-    output = [f"GitHub 搜索结果: {query}\n"]
+    header = f"GitHub 搜索结果: {final_query}\n"
+    if was_translated:
+        header += f"   (中文关键词 \"{query}\" 已自动转为英文关键词 + star 过滤)\n"
+    output = [header]
     for i, repo in enumerate(repos, 1):
         output.append(
             f"{i}. {repo.name}\n"

@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 
 from core.models import RepoInfo
 
+from github.keywords import build_search_query
+
 
 class RateLimitError(Exception):
     """Raised when GitHub API rate limit is hit."""
@@ -126,15 +128,16 @@ class GitHubConnector:
         """Search GitHub for repositories matching the query, sorted by stars.
 
         Args:
-            query: Search query
+            query: Search query (Chinese terms are auto-translated to English)
             limit: Maximum results
 
         Returns:
             List of RepoInfo, or None if network unavailable
         """
+        final_query, _ = build_search_query(query)
         url = (
             f"https://api.github.com/search/repositories"
-            f"?q={urllib.parse.quote(query)}&sort=stars&per_page={limit}"
+            f"?q={urllib.parse.quote(final_query)}&sort=stars&per_page={limit}"
         )
 
         data = self._api_request(url)
